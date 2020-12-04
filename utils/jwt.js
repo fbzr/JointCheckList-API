@@ -12,5 +12,7 @@ module.exports = decode = (token) => {
     if (!err && decoded) {
       return decoded;
     }
+
+    return null;
   });
 };

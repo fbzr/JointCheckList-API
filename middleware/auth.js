@@ -1,7 +1,19 @@
 const { decodeToken } = require("../utils/jwt");
 
 module.exports = (req, res, next) => {
-  console.log("authentication");
+  // Get token from header
+  const token = req.header("Authorization");
 
-  next();
+  if (!token) {
+    // TODO: next(error) - middleware
+  }
+
+  const decoded = decodeToken(token);
+
+  if (decoded) {
+    req.user = decoded.user;
+    next();
+  }
+
+  // TODO: next(error)
 };
