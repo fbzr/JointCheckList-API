@@ -12,5 +12,5 @@ const auth = require("./middleware/auth");
 server.use("/auth", routes.auth);
 server.use("/lists", auth, routes.lists);
 
-const PORT = 8000;
+const PORT = process.env.PORT || 8000;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
