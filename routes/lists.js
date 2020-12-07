@@ -1,5 +1,13 @@
 const router = require("express").Router();
 
-router.get("/", (req, res) => res.send("lists route"));
+module.exports = (db) => {
+  const listController = require("../data/controllers/lists");
 
-module.exports = router;
+  router.get("/", async (req, res) => {
+    const lists = await listController.findAll();
+
+    res.json({ lists });
+  });
+
+  return router;
+};

@@ -3,17 +3,10 @@ const saltRounds = Number(process.env.BCRYPT_ROUNDS);
 
 // return hash
 const generateHash = (str) => {
-  bcrypt.genSalt(saltRounds, (err, salt) => {
-    if (!err) {
-      bcrypt.hash(password, salt, (err, hash) => {
-        if (!err) {
-          return hash;
-        }
-      });
-    }
+  const salt = bcrypt.genSaltSync(saltRounds);
+  const hash = bcrypt.hashSync(str, salt);
 
-    return null;
-  });
+  return hash;
 };
 
 // return boolean

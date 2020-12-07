@@ -9,16 +9,16 @@ const connect = async (url) => {
   });
 
   // return DB from connection string
-  return await mongoClient.connect();
+  return (await mongoClient.connect()).db();
 };
 
 module.exports = async () => {
   // You can add different URL for prod, dev or testing environments
-  let mongoClients = await Promise.all([connect(process.env.MONGO_URL)]);
+  let dbs = await Promise.all([connect(process.env.MONGO_URL)]);
 
   return {
-    production: mongoClients[0],
-    development: mongoClients[0],
-    testing: mongoClients[0],
+    production: dbs[0],
+    development: dbs[0],
+    testing: dbs[0],
   };
 };

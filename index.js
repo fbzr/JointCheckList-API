@@ -14,16 +14,16 @@ app.get("/", (req, res) => res.send("API running"));
 // app.use("/lists", auth, routes.lists);
 
 const routes = require("./routes");
-let client;
+let db;
 
 initDb()
-  .then((mongoClients) => {
+  .then((dbs) => {
     console.log("MongoDB connected");
-    client = mongoClients[process.env.NODE_ENV];
-    const db = client.db();
+    db = dbs[process.env.NODE_ENV];
 
     const PORT = process.env.PORT || 8000;
-    const server = routes(app, db).listen(PORT, () => {
+
+    routes(app, db).listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
     });
   })

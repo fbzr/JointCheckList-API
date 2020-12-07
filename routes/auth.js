@@ -4,21 +4,43 @@ const router = require("express").Router();
 
 module.exports = (db) => {
   // pass account collection to get its controller
-  // const accountController = require("../data/controllers")(
-  //   db.collection("accounts")
-  // );
-  // OR
-  // const listController = require('../data/controllers/list');
+  const userController = require("../data/controllers")(db.collection("users"));
 
-  router.get("/register", async (req, res) => {
+  router.post("/register", async (req, res, next) => {
     const { username, password } = req.body;
-    // TODO: check if user is already in DB
+
+    // return error if missing required field
+    if (!username || !password) {
+      return next({
+        statusCode: 400,
+        errorMessage: "Missing required field",
+      });
+    }
+
+    // check if user is already in DB
+    let user = await userController.findOne({ username });
+
+    if (user) {
+      return next({
+        statusCode: 400,
+        errorMessage: "This username is already registered",
+      });
+    }
+
     const hash = bcrypt.generateHash(password);
-    // TODO: save it to DB
-    res.json({
-      username,
-      password: hash,
-    });
+    // save it to DB
+    await userController.insertOne({ ...req.body, password: hash });
+
+    user = await userController.findOne({ username });
+
+    // filter to return all user props but password
+    user = Object.entries(user).reduce(
+      (result, [key, value]) =>
+        key !== "password" ? { ...result, [key]: value } : result,
+      {}
+    );
+
+    res.json({ ...user });
   });
 
   router.post("/login", (req, res) => {
