@@ -10,13 +10,9 @@ const generateToken = (payload) => {
 
 // return recoded token if successful
 const decodeToken = (token) => {
-  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-    if (!err && decoded) {
-      return decoded;
-    }
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    return null;
-  });
+  return decoded;
 };
 
 module.exports = {

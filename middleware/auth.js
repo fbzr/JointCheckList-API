@@ -5,15 +5,20 @@ module.exports = (req, res, next) => {
   const token = req.header("Authorization");
 
   if (!token) {
-    // TODO: next(error) - middleware
+    next({
+      statusCode: 401,
+      errorMessage: "Token required",
+    });
   }
 
-  const decoded = decodeToken(token);
-
-  if (decoded) {
+  try {
+    const decoded = decodeToken(token);
     req.user = decoded.user;
     next();
+  } catch (err) {
+    next({
+      statusCode: 401,
+      errorMessage: "Invalid Token",
+    });
   }
-
-  // TODO: next(error)
 };

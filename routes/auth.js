@@ -2,6 +2,16 @@ const bcrypt = require("../utils/bcrypt");
 const { generateToken } = require("../utils/jwt");
 const router = require("express").Router();
 
+// Util function
+const removePasswordProp = (obj) => {
+  // filter to return all user props but password
+  return Object.entries(obj).reduce(
+    (result, [key, value]) =>
+      key !== "password" ? { ...result, [key]: value } : result,
+    {}
+  );
+};
+
 module.exports = (db) => {
   // pass account collection to get its controller
   const userController = require("../data/controllers")(db.collection("users"));
@@ -34,11 +44,7 @@ module.exports = (db) => {
     user = await userController.findOne({ username });
 
     // filter to return all user props but password
-    user = Object.entries(user).reduce(
-      (result, [key, value]) =>
-        key !== "password" ? { ...result, [key]: value } : result,
-      {}
-    );
+    user = removePasswordProp(user);
 
     res.json({ ...user });
   });
@@ -55,7 +61,7 @@ module.exports = (db) => {
     }
 
     // get user and password from DB
-    const user = await userController.findOne({ username });
+    let user = await userController.findOne({ username });
 
     if (!user) {
       return next({
@@ -73,7 +79,10 @@ module.exports = (db) => {
       });
     }
 
+    // generate token passing user without password property
+    user = removePasswordProp(user);
     const token = generateToken({ user });
+
     res.json({ token, username });
   });
 
