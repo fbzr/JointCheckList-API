@@ -43,24 +43,38 @@ module.exports = (db) => {
     res.json({ ...user });
   });
 
-  router.post("/login", (req, res) => {
+  router.post("/login", async (req, res, next) => {
     const { username, password } = req.body;
 
-    // TODO: get user and password from DB
-    const user = req.body;
-
-    // TODO: change second param to hashed password from DB
-    const match = bcrypt.compare(
-      password,
-      "$2a$12$rh.RjaukLr2o0WwSiStSYu6/GLJlVfDT2/qjWN0IP.nkaWa9vAaLW"
-    );
-
-    if (match) {
-      const token = jwt.generateToken({ user });
-      res.json({ token, username });
-    } else {
-      // username and password don't match
+    // return error if missing required field
+    if (!username || !password) {
+      return next({
+        statusCode: 400,
+        errorMessage: "Missing required field",
+      });
     }
+
+    // get user and password from DB
+    const user = await userController.findOne({ username });
+
+    if (!user) {
+      return next({
+        statusCode: 401,
+        errorMessage: "Invalid username",
+      });
+    }
+
+    const match = bcrypt.compare(password, user.password);
+
+    if (!match) {
+      return next({
+        statusCode: 401,
+        errorMessage: "Password doesn't match",
+      });
+    }
+
+    const token = generateToken({ user });
+    res.json({ token, username });
   });
 
   return router;

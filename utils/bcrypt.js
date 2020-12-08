@@ -11,9 +11,7 @@ const generateHash = (str) => {
 
 // return boolean
 const compare = (str, hash) => {
-  return bcrypt.compare(str, hash, (err, match) => {
-    return match;
-  });
+  return bcrypt.compareSync(str, hash);
 };
 
 module.exports = {
