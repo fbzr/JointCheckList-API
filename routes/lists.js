@@ -1,9 +1,13 @@
 const router = require("express").Router();
+const itemsRouter = require("./items");
 const ObjectId = require("mongodb").ObjectId;
 
 module.exports = (db) => {
   const listController = require("../data/controllers")(db.collection("lists"));
   const userController = require("../data/controllers")(db.collection("users"));
+
+  // items route
+  router.use("/:listId/items", itemsRouter(db));
 
   // @route   GET /lists
   // @desc    Return all lists
@@ -11,7 +15,7 @@ module.exports = (db) => {
   router.get("/", async (req, res, next) => {
     try {
       const lists = await listController.findAll();
-      res.json({ lists });
+      res.json(lists);
     } catch (error) {
       next({
         errorMessage: "There was a problem retrieving data from the Database",
@@ -26,11 +30,11 @@ module.exports = (db) => {
     const { id } = req.params;
 
     try {
-      const list = await listController.findOne({ _id: ObjectId(id) });
+      const list = await listController.findById(id);
 
       if (!list) throw new Error();
 
-      res.json({ ...list });
+      res.json(list);
     } catch (error) {
       return next({ statusCode: 400, errorMessage: "Invalid list ID" });
     }
@@ -53,15 +57,12 @@ module.exports = (db) => {
     });
 
     // add list to user
-    await userController.updateOne(
-      { _id: ObjectId(req.user._id) },
-      {
-        $push: { lists: list },
-      }
-    );
+    await userController.updateOne(req.user._id, {
+      $push: { lists: list },
+    });
 
     // return new list
-    res.json({ ...list });
+    res.json(list);
   });
 
   // @route   PATCH /lists/:id
@@ -71,14 +72,13 @@ module.exports = (db) => {
     try {
       const { id } = req.params;
 
-      const updatedList = await listController.updateOne(
-        { _id: ObjectId(id) },
-        { $set: req.body }
-      );
+      const updatedList = await listController.updateOne(id, {
+        $set: req.body,
+      });
 
       if (!updatedList) throw new Error();
 
-      res.json({ ...updatedList });
+      res.json(updatedList);
     } catch (error) {
       return next({ statusCode: 400, errorMessage: "Invalid list ID" });
     }
@@ -91,7 +91,7 @@ module.exports = (db) => {
     try {
       const { id } = req.params;
 
-      const deletedList = await listController.deleteOne({ _id: ObjectId(id) });
+      const deletedList = await listController.deleteOne(id);
 
       console.log("deletedList", deletedList);
       if (!deletedList) throw new Error();

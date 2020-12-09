@@ -1,6 +1,12 @@
+const ObjectId = require("mongodb").ObjectId;
+
 module.exports = (collection) => {
   const findAll = async () => {
     return await collection.find().toArray();
+  };
+
+  const findById = async (id) => {
+    return await collection.findOne({ _id: ObjectId(id) });
   };
 
   const findOne = async (query, options = {}) => {
@@ -16,23 +22,28 @@ module.exports = (collection) => {
     return result.ops[0];
   };
 
-  const updateOne = async (filter, update) => {
-    const result = await collection.findOneAndUpdate(filter, update, {
-      upsert: false, // if true, allows creating of new doc if match is not found
-      returnOriginal: false, // false to return updated doc
-    });
+  const updateOne = async (id, update) => {
+    const result = await collection.findOneAndUpdate(
+      { _id: ObjectId(id) },
+      update,
+      {
+        upsert: false, // if true, allows creating of new doc if match is not found
+        returnOriginal: false, // false to return updated doc
+      }
+    );
 
     return result.value;
   };
 
   // returns deleted doc or null if not found
-  const deleteOne = async (filter) => {
-    const result = await collection.findOneAndDelete(filter);
+  const deleteOne = async (id) => {
+    const result = await collection.findOneAndDelete({ _id: ObjectId(id) });
     return result.value;
   };
 
   return {
     findAll,
+    findById,
     findOne,
     insertOne,
     updateOne,
