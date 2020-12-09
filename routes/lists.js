@@ -1,12 +1,67 @@
 const router = require("express").Router();
+const ObjectId = require("mongodb").ObjectId;
 
 module.exports = (db) => {
-  const listController = require("../data/controllers/lists")(db);
+  const listController = require("../data/controllers")(db.collection("lists"));
+  const userController = require("../data/controllers")(db.collection("users"));
 
-  router.get("/", async (req, res) => {
-    const lists = await listController.findAll();
+  // @route   GET /lists
+  // @desc    Return all lists
+  // @access  Private
+  router.get("/", async (req, res, next) => {
+    try {
+      const lists = await listController.findAll();
+      res.json({ lists });
+    } catch (error) {
+      next({
+        errorMessage: "There was a problem retrieving data from the Database",
+      });
+    }
+  });
 
-    res.json({ lists });
+  // @route   GET /lists/:id
+  // @desc    Return specific list
+  // @access  Private
+  router.get("/:id", async (req, res, next) => {
+    const { id } = req.params;
+
+    try {
+      const list = await listController.findOne({ _id: ObjectId(id) });
+
+      if (!list) throw new Error();
+
+      res.json({ ...list });
+    } catch (error) {
+      return next({ statusCode: 400, errorMessage: "Invalid list ID" });
+    }
+  });
+
+  // @route   POST /lists
+  // @desc    Insert new list
+  // @access  Private
+  router.post("/", async (req, res, next) => {
+    const { title } = req.body;
+
+    if (!title) {
+      return next({ statusCode: 400, errorMessage: "Required field missing" });
+    }
+
+    const list = await listController.insertOne({
+      title,
+      items: [],
+      users: [ObjectId(req.user._id)],
+    });
+
+    // add list to user
+    await userController.updateOne(
+      { _id: ObjectId(req.user._id) },
+      {
+        $push: { lists: list },
+      }
+    );
+
+    // return new list
+    res.json({ ...list });
   });
 
   return router;

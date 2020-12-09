@@ -8,12 +8,27 @@ module.exports = (collection) => {
   };
 
   const insertOne = async (doc) => {
-    return await collection.insertOne(doc);
+    const result = await collection.insertOne({
+      ...doc,
+      created_at: Date.now(),
+    });
+    // return inserted document
+    return result.ops[0];
+  };
+
+  const updateOne = async (filter, update) => {
+    const result = await collection.findOneAndUpdate(filter, update, {
+      upsert: false, // if true, allows creating of new doc if match is not found
+      returnOriginal: false, // false to return updated doc
+    });
+
+    return result.value;
   };
 
   return {
     findAll,
     findOne,
     insertOne,
+    updateOne,
   };
 };
