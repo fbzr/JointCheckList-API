@@ -25,10 +25,17 @@ module.exports = (collection) => {
     return result.value;
   };
 
+  // returns deleted doc or null if not found
+  const deleteOne = async (filter) => {
+    const result = await collection.findOneAndDelete(filter);
+    return result.value;
+  };
+
   return {
     findAll,
     findOne,
     insertOne,
     updateOne,
+    deleteOne,
   };
 };
