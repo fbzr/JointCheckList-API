@@ -10,7 +10,7 @@ module.exports = (collection) => {
   const insertOne = async (doc) => {
     const result = await collection.insertOne({
       ...doc,
-      created_at: Date.now(),
+      created_at: new Date(),
     });
     // return inserted document
     return result.ops[0];

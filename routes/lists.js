@@ -64,5 +64,25 @@ module.exports = (db) => {
     res.json({ ...list });
   });
 
+  // @route   PATCH /lists/:id
+  // @desc    Update/Patch specific list
+  // @access  Private
+  router.patch("/:id", async (req, res, next) => {
+    try {
+      const { id } = req.params;
+
+      const updatedList = await listController.updateOne(
+        { _id: ObjectId(id) },
+        { $set: req.body }
+      );
+
+      if (!updatedList) throw new Error();
+
+      res.json({ ...updatedList });
+    } catch (error) {
+      return next({ statusCode: 400, errorMessage: "Invalid list ID" });
+    }
+  });
+
   return router;
 };
