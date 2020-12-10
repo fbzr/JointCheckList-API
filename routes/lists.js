@@ -58,7 +58,7 @@ module.exports = (db) => {
 
     // add list to user
     await userController.updateOne(req.user._id, {
-      $push: { lists: list },
+      $push: { lists: list._id },
     });
 
     // return new list
