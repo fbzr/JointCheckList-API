@@ -24,7 +24,30 @@ module.exports = (db) => {
   // @route   POST /lists/:listId/items
   // @desc    Insert new item to specific list
   // @access  Private
-  router.post("/", async (req, res, next) => {});
+  router.post("/", async (req, res, next) => {
+    const { listId } = req.params;
+    const { title } = req.body;
+
+    if (!title)
+      return next({ statusCode: 400, errorMessage: "Required field missing" });
+
+    let item = {
+      _id: ObjectId(),
+      title,
+      done: false,
+      list_id: listId, // TODO: Rethink if I need this prop
+      created_at: new Date(),
+    };
+
+    const updatedList = await listController.updateOne(listId, {
+      $push: {
+        items: item,
+      },
+    });
+
+    // return added item
+    res.json(item);
+  });
 
   return router;
 };
