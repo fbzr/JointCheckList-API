@@ -7,7 +7,7 @@ module.exports = (db) => {
   const userController = require("../data/controllers")(db.collection("users"));
 
   // middleware to verify if list is one of logged user's list
-  router.user("/:id", async (req, res, next) => {
+  router.use("/:id", async (req, res, next) => {
     const list = await listController.findById(id);
 
     if (!list || !list.users.includes(ObjectId(req.user._id))) {
