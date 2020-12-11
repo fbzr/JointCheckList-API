@@ -6,15 +6,27 @@ module.exports = (db) => {
   const listController = require("../data/controllers")(db.collection("lists"));
   const userController = require("../data/controllers")(db.collection("users"));
 
+  // middleware to verify if list is one of logged user's list
+  router.user("/:id", async (req, res, next) => {
+    const list = await listController.findById(id);
+
+    if (!list || !list.users.includes(ObjectId(req.user._id))) {
+      return next({ statusCode: 400, errorMessage: "Invalid list ID" });
+    }
+
+    next();
+  });
+
   // items route
   router.use("/:listId/items", itemsRouter(db));
 
   // @route   GET /lists
-  // @desc    Return all lists
+  // @desc    Return all lists from logged user
   // @access  Private
   router.get("/", async (req, res, next) => {
     try {
-      const lists = await listController.findAll();
+      let { lists } = await userController.findById(req.user._id);
+      lists = await listController.findAll({ _id: { $in: lists } });
       res.json(lists);
     } catch (error) {
       next({
