@@ -39,7 +39,7 @@ module.exports = (db) => {
 
     const hash = bcrypt.generateHash(password);
     // save it to DB
-    await userController.insertOne({ ...req.body, password: hash });
+    await userController.insertOne({ ...req.body, lists: [], password: hash });
 
     user = await userController.findOne({ username });
 

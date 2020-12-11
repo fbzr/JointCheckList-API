@@ -6,15 +6,24 @@ module.exports = (db) => {
   const listController = require("../data/controllers")(db.collection("lists"));
   const userController = require("../data/controllers")(db.collection("users"));
 
-  // middleware to verify if list is one of logged user's list
+  // middleware to verify list ID and user permission
   router.use("/:id", async (req, res, next) => {
-    const list = await listController.findById(id);
+    try {
+      const { id } = req.params;
 
-    if (!list || !list.users.includes(ObjectId(req.user._id))) {
+      const list = await listController.findOne({
+        _id: ObjectId(id),
+        users: { $elemMatch: { $eq: ObjectId(req.user._id) } },
+      });
+
+      if (!list) throw new Error();
+
+      // save list in req.list
+      req.list = list;
+      next();
+    } catch (error) {
       return next({ statusCode: 400, errorMessage: "Invalid list ID" });
     }
-
-    next();
   });
 
   // items route
@@ -25,8 +34,13 @@ module.exports = (db) => {
   // @access  Private
   router.get("/", async (req, res, next) => {
     try {
-      let { lists } = await userController.findById(req.user._id);
-      lists = await listController.findAll({ _id: { $in: lists } });
+      let userLists = (await userController.findById(req.user._id)).lists || [];
+
+      // filter lists from logged user
+      const lists = await listController.findMany({
+        _id: { $in: userLists.map((id) => ObjectId(id)) },
+      });
+
       res.json(lists);
     } catch (error) {
       next({
@@ -39,9 +53,8 @@ module.exports = (db) => {
   // @desc    Return specific list
   // @access  Private
   router.get("/:id", async (req, res, next) => {
-    const { id } = req.params;
-
     try {
+      const { id } = req.params;
       const list = await listController.findById(id);
 
       if (!list) throw new Error();

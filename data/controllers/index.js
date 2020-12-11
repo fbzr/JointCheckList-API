@@ -5,6 +5,10 @@ module.exports = (collection) => {
     return await collection.find().toArray();
   };
 
+  const findMany = async (query) => {
+    return await collection.find(query).toArray();
+  };
+
   const findById = async (id) => {
     return await collection.findOne({ _id: ObjectId(id) });
   };
@@ -43,6 +47,7 @@ module.exports = (collection) => {
 
   return {
     findAll,
+    findMany,
     findById,
     findOne,
     insertOne,
