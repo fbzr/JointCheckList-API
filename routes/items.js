@@ -11,7 +11,10 @@ module.exports = (db) => {
     try {
       const { listId } = req.params;
 
-      const { items } = await listController.findById(listId);
+      // pass projection option to specify what to return from the object
+      const { items } = await listController.findById(listId, {
+        projection: { items: 1, _id: 0 },
+      });
 
       if (!items) throw new Error();
 
@@ -31,7 +34,7 @@ module.exports = (db) => {
     if (!title)
       return next({ statusCode: 400, errorMessage: "Required field missing" });
 
-    let item = {
+    const item = {
       _id: ObjectId(),
       title,
       done: false,
@@ -39,6 +42,7 @@ module.exports = (db) => {
       created_at: new Date(),
     };
 
+    // update list pushing new Item to list of items
     const updatedList = await listController.updateOne(listId, {
       $push: {
         items: item,
@@ -47,6 +51,17 @@ module.exports = (db) => {
 
     // return added item
     res.json(item);
+  });
+
+  // @route   GET /lists/:listId/items/:id
+  // @desc    Return specific item from a list
+  // @access  Private
+  router.get("/:id", async (req, res, next) => {
+    const { listId, id } = req.params;
+
+    const result = await listController.findById(listId);
+
+    res.json(result);
   });
 
   return router;

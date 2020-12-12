@@ -9,8 +9,8 @@ module.exports = (collection) => {
     return await collection.find(query).toArray();
   };
 
-  const findById = async (id) => {
-    return await collection.findOne({ _id: ObjectId(id) });
+  const findById = async (id, options = {}) => {
+    return await collection.findOne({ _id: ObjectId(id) }, options);
   };
 
   const findOne = async (query, options = {}) => {
