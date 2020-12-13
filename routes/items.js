@@ -43,7 +43,7 @@ module.exports = (db) => {
     };
 
     // update list pushing new Item to list of items
-    const updatedList = await listController.updateOne(listId, {
+    const updatedList = await listController.updateOneById(listId, {
       $push: {
         items: item,
       },
@@ -73,6 +73,48 @@ module.exports = (db) => {
         return next({ statusCode: 400, errorMessage: "Invalid item ID" });
 
       res.json(item);
+    } catch (error) {
+      next({ statusCode: 400, errorMessage: "Invalid list or item ID" });
+    }
+  });
+
+  // @route   PATCH /lists/:listId/items/:id
+  // @desc    Update specific item from a list
+  // @access  Private
+  router.patch("/:id", async (req, res, next) => {
+    try {
+      const { listId, id } = req.params;
+
+      const { items } = await listController.findById(listId, {
+        projection: { items: 1, _id: 0 },
+      });
+
+      if (!items)
+        return next({ statusCode: 400, errorMessage: "Invalid list ID" });
+
+      const item = items.find((el) => el._id.equals(ObjectId(id)));
+
+      if (!item)
+        return next({ statusCode: 400, errorMessage: "Invalid item ID" });
+
+      const updatedList = await listController.updateOne(
+        {
+          _id: ObjectId(listId),
+          "items._id": ObjectId(id),
+        },
+        {
+          $set: {
+            "items.$": {
+              ...item,
+              ...req.body,
+            },
+          },
+        }
+      );
+
+      if (!updatedList) throw new Error();
+
+      res.json({ ...item, ...req.body });
     } catch (error) {
       next({ statusCode: 400, errorMessage: "Invalid list or item ID" });
     }

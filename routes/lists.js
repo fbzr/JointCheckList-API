@@ -82,7 +82,7 @@ module.exports = (db) => {
     });
 
     // add list to user
-    await userController.updateOne(req.user._id, {
+    await userController.updateOneById(req.user._id, {
       $push: { lists: list._id },
     });
 
@@ -97,7 +97,7 @@ module.exports = (db) => {
     try {
       const { id } = req.params;
 
-      const updatedList = await listController.updateOne(id, {
+      const updatedList = await listController.updateOneById(id, {
         $set: req.body,
       });
 

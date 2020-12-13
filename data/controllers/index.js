@@ -26,7 +26,16 @@ module.exports = (collection) => {
     return result.ops[0];
   };
 
-  const updateOne = async (id, update) => {
+  const updateOne = async (query, update) => {
+    const result = await collection.findOneAndUpdate(query, update, {
+      upsert: false, // if true, allows creating of new doc if match is not found
+      returnOriginal: false, // false to return updated doc
+    });
+
+    return result.value;
+  };
+
+  const updateOneById = async (id, update) => {
     const result = await collection.findOneAndUpdate(
       { _id: ObjectId(id) },
       update,
@@ -51,6 +60,7 @@ module.exports = (collection) => {
     findById,
     findOne,
     insertOne,
+    updateOneById,
     updateOne,
     deleteOne,
   };
