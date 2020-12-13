@@ -57,11 +57,25 @@ module.exports = (db) => {
   // @desc    Return specific item from a list
   // @access  Private
   router.get("/:id", async (req, res, next) => {
-    const { listId, id } = req.params;
+    try {
+      const { listId, id } = req.params;
 
-    const result = await listController.findById(listId);
+      const { items } = await listController.findById(listId, {
+        projection: { items: 1, _id: 0 },
+      });
 
-    res.json(result);
+      if (!items)
+        return next({ statusCode: 400, errorMessage: "Invalid list ID" });
+
+      const item = items.find((el) => el._id.equals(ObjectId(id)));
+
+      if (!item)
+        return next({ statusCode: 400, errorMessage: "Invalid item ID" });
+
+      res.json(item);
+    } catch (error) {
+      next({ statusCode: 400, errorMessage: "Invalid list or item ID" });
+    }
   });
 
   return router;
