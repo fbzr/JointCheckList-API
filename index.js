@@ -16,7 +16,10 @@ initDb()
 
     const PORT = process.env.PORT || 8000;
 
-    routes(app, db).listen(PORT, () => {
+    // routes fnc returns app instance
+    const server = require("http").createServer(routes(app, db));
+
+    server.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
     });
   })
