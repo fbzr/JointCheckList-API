@@ -120,5 +120,28 @@ module.exports = (db) => {
     }
   });
 
+  // @route   DELETE /lists/:listId/items/:id
+  // @desc    Delete specific item from a list
+  // @access  Private
+  router.delete("/:id", async (req, res, next) => {
+    try {
+      const { listId, id } = req.params;
+
+      const updatedList = await listController.updateOneById(listId, {
+        $pull: {
+          items: {
+            _id: ObjectId(id),
+          },
+        },
+      });
+
+      if (!updatedList) throw new Error();
+
+      res.json(updatedList);
+    } catch (error) {
+      return next({ statusCode: 400, errorMessage: "Invalid list ID" });
+    }
+  });
+
   return router;
 };

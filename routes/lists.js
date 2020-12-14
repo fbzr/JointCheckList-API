@@ -118,7 +118,6 @@ module.exports = (db) => {
 
       const deletedList = await listController.deleteOne(id);
 
-      console.log("deletedList", deletedList);
       if (!deletedList) throw new Error();
 
       res.json({ success: !!deletedList, deletedList: deletedList });
