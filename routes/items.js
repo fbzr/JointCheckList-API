@@ -137,7 +137,7 @@ module.exports = (db) => {
 
       if (!updatedList) throw new Error();
 
-      res.json(updatedList);
+      res.json(updatedList.items);
     } catch (error) {
       return next({ statusCode: 400, errorMessage: "Invalid list ID" });
     }
