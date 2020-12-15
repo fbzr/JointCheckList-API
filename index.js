@@ -3,8 +3,9 @@ const express = require("express");
 const helmet = require("helmet");
 const initDb = require("./data/db");
 
-const app = express();
-const http = require("http").createServer(app);
+var app = express();
+const server = require("http").createServer(app);
+const io = require("socket.io")(server);
 const routes = require("./routes");
 
 app.use(express.json());
@@ -16,10 +17,9 @@ const init = async () => {
     const db = dbs[process.env.NODE_ENV];
     console.log("MongoDB connected");
 
-    // routes function returns app instance
-    const server = require("http").createServer(routes(app, db));
-    const PORT = process.env.PORT || 8000;
+    routes(app, db);
 
+    const PORT = process.env.PORT || 8000;
     server.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
     });
