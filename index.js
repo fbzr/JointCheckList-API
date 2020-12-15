@@ -14,10 +14,10 @@ initDb()
     console.log("MongoDB connected");
     const db = dbs[process.env.NODE_ENV];
 
-    const PORT = process.env.PORT || 8000;
-
-    // routes fnc returns app instance
+    // routes function returns app instance
     const server = require("http").createServer(routes(app, db));
+
+    const PORT = process.env.PORT || 8000;
 
     server.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
