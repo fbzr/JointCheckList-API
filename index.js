@@ -11,11 +11,28 @@ const routes = require("./routes");
 app.use(express.json());
 app.use(helmet());
 
+io.on("connection", (socket) => {
+  console.log("a user connected");
+
+  socket.on("disconnect", function () {
+    console.log("Disconnected - " + socket.id);
+  });
+
+  socket.emmit("loadData", { lists: ["test"] });
+
+  socket.on("addList", (list) => {
+    console.log("socket addList");
+    console.log("***list***\n", list);
+  });
+});
+
 const init = async () => {
   try {
     const dbs = await initDb();
     const db = dbs[process.env.NODE_ENV];
     console.log("MongoDB connected");
+
+    // TODO: load data here
 
     routes(app, db);
 
