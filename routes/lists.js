@@ -2,7 +2,7 @@ const router = require("express").Router();
 const itemsRouter = require("./items");
 const ObjectId = require("mongodb").ObjectId;
 
-module.exports = (db) => {
+module.exports = (db, socket) => {
   const listController = require("../data/controllers")(db.collection("lists"));
   const userController = require("../data/controllers")(db.collection("users"));
 
