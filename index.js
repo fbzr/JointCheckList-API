@@ -34,7 +34,7 @@ const init = async () => {
     });
   } catch (error) {
     console.error("Failed to connect to Database");
-    console.error(err);
+    console.error(error);
     process.exit(1);
   }
 };
