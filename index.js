@@ -24,12 +24,13 @@ const init = async () => {
     io.on("connection", (socket) => {
       listenSocket(socket);
 
+      // routes are going to be available only when a client is connected
       routes(app, db, socket);
+    });
 
-      const PORT = process.env.PORT || 8000;
-      server.listen(PORT, () => {
-        console.log(`Server running on port ${PORT}`);
-      });
+    const PORT = process.env.PORT || 8000;
+    server.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
     });
   } catch (error) {
     console.error("Failed to connect to Database");

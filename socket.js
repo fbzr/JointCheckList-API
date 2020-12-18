@@ -1,5 +1,5 @@
 module.exports = (socket) => {
-  console.log("a user connected");
+  console.log(`User ${socket.id} connected`);
 
   socket.on("disconnect", function () {
     console.log("Disconnected - " + socket.id);
