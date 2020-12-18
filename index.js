@@ -12,6 +12,8 @@ const routes = require("./routes");
 app.use(express.json());
 app.use(helmet());
 
+app.get("/", (req, res) => res.send("API Working"));
+
 const init = async () => {
   try {
     const dbs = await initDb();
