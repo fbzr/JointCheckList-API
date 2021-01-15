@@ -6,10 +6,13 @@ const initDb = require("./data/db");
 var app = express();
 const server = require("http").createServer(app);
 const io = require("socket.io")(server);
+const listenSocket = require("./socket");
 const routes = require("./routes");
 
 app.use(express.json());
 app.use(helmet());
+
+app.get("/", (req, res) => res.send("API Working"));
 
 const init = async () => {
   try {
@@ -17,7 +20,15 @@ const init = async () => {
     const db = dbs[process.env.NODE_ENV];
     console.log("MongoDB connected");
 
-    routes(app, db);
+    // SOCKET.IO HERE
+    // ADD ALL IO.ON here (another file)
+    // PASS IO instance to routes to emmit events to clients
+    io.on("connection", (socket) => {
+      listenSocket(socket);
+
+      // routes are going to be available only when a client is connected
+      routes(app, db, socket);
+    });
 
     const PORT = process.env.PORT || 8000;
     server.listen(PORT, () => {
@@ -25,7 +36,7 @@ const init = async () => {
     });
   } catch (error) {
     console.error("Failed to connect to Database");
-    console.error(err);
+    console.error(error);
     process.exit(1);
   }
 };
